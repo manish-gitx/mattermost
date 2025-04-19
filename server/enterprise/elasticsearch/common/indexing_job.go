@@ -180,10 +180,7 @@ func (worker *IndexerWorker) JobChannel() chan<- model.Job {
 }
 
 func (worker *IndexerWorker) IsEnabled(cfg *model.Config) bool {
-	if license := worker.license(); license == nil || !*license.Features.Elasticsearch {
-		return false
-	}
-
+	// Remove license check to allow open source users to use Elasticsearch
 	if *cfg.ElasticsearchSettings.EnableIndexing {
 		return true
 	}

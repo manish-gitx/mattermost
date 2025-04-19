@@ -89,7 +89,8 @@ func (os *OpensearchInterfaceImpl) IsIndexingSync() bool {
 }
 
 func (os *OpensearchInterfaceImpl) Start() *model.AppError {
-	if license := os.Platform.License(); license == nil || !*license.Features.Elasticsearch || !*os.Platform.Config().ElasticsearchSettings.EnableIndexing {
+	// Remove license check, allow open source version to use OpenSearch
+	if !*os.Platform.Config().ElasticsearchSettings.EnableIndexing {
 		return nil
 	}
 
@@ -1340,10 +1341,7 @@ func (os *OpensearchInterfaceImpl) DeleteUser(user *model.User) *model.AppError 
 }
 
 func (os *OpensearchInterfaceImpl) TestConfig(rctx request.CTX, cfg *model.Config) *model.AppError {
-	if license := os.Platform.License(); license == nil || !*license.Features.Elasticsearch {
-		return model.NewAppError("Opensearch.TestConfig", "ent.elasticsearch.test_config.license.error", nil, "", http.StatusNotImplemented)
-	}
-
+	// Remove license check, allow open source version to use the test config functionality
 	if !*cfg.ElasticsearchSettings.EnableIndexing {
 		return model.NewAppError("Opensearch.TestConfig", "ent.elasticsearch.test_config.indexing_disabled.error", map[string]any{"Backend": model.ElasticsearchSettingsOSBackend}, "", http.StatusNotImplemented)
 	}

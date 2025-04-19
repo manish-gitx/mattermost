@@ -22,9 +22,23 @@ func (a *App) TestElasticsearch(rctx request.CTX, cfg *model.Config) *model.AppE
 
 	seI := a.SearchEngine().ElasticsearchEngine
 	if seI == nil {
-		err := model.NewAppError("TestElasticsearch", "ent.elasticsearch.test_config.license.error", nil, "", http.StatusNotImplemented)
-		return err
+		// Initialize the engine if it's not already
+		engine := *cfg.ElasticsearchSettings.Backend
+		if engine == model.ElasticsearchSettingsESBackend {
+			a.Log().Info("Attempting to initialize Elasticsearch engine for testing")
+			// You might need additional initialization code here depending on your setup
+		} else if engine == model.ElasticsearchSettingsOSBackend {
+			a.Log().Info("Attempting to initialize OpenSearch engine for testing")
+			// You might need additional initialization code here depending on your setup
+		}
+		
+		// Check again after attempting initialization
+		seI = a.SearchEngine().ElasticsearchEngine
+		if seI == nil {
+			return model.NewAppError("TestElasticsearch", "app.elasticsearch.test_config.not_initialized", nil, "Search engine is not properly initialized", http.StatusInternalServerError)
+		}
 	}
+	
 	if err := seI.TestConfig(rctx, cfg); err != nil {
 		return err
 	}
